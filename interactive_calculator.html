@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Selling Calculator</title>
+    <style>
+        *{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        .calculator {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .container{
+
+            background-color: rgb(239, 236, 236);
+            padding: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+
+        .range-slider {
+            position: relative;
+            max-width: 80%; /* Adjust the maximum width of the range slider */
+            margin: 0 auto; /* Center the range slider */
+            padding: 10px; /* Add padding for spacing */
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%; /* Keep the width to 100% within the container */
+            height: 20px; /* Increase the height of the slider */
+            outline: none;
+            opacity: 0.7;
+            border-radius: 20px; /* Add border radius */
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            background: linear-gradient(to right, #FF0000 0%, #FF0000 50%, #000000 50%, #000000 100%); /* Set the initial slider background color */
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 0; /* Set width to 0 to hide default thumb */
+            height: 0; /* Set height to 0 to hide default thumb */
+            cursor: pointer;
+            z-index: 0;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 0; /* Set width to 0 to hide default thumb */
+            height: 0; /* Set height to 0 to hide default thumb */
+            cursor: pointer;
+            z-index: 0;
+        }
+
+        .custom-thumb {
+            position: absolute;
+            top: 75%; /* Adjust top position to center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+            width: 80px; /* Adjust the width of the custom thumb */
+            height: 80px; /* Adjust the height of the custom thumb */
+            z-index: 2;
+            border-radius: 50%; /* Make it circular */
+            overflow: hidden; /* Hide content outside of the circle */
+        }
+
+        .custom-thumb img {
+            border-radius: 100%;
+            width: 60%; /* Make sure the image fills the container */
+            height: 60%; /* Make sure the image fills the container */
+            object-fit: cover; /* Maintain aspect ratio while covering the container */
+        }
+
+        #output {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        .note {
+            text-align: center;
+            margin-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">Sell Your Home for as low as a 2% Commission*</h1>
+    <div class="calculator">
+        <h2 style="color: #FF0000;" id="salePrice">SALE PRICE: $<span id="salePriceValue">500,000</span></h2>
+        <div class="range-slider">
+            <input type="range" min="150000" max="2000000" value="500000" step="5000" class="slider" id="priceSlider">
+            <div class="custom-thumb">
+                <img src="/image/slider image.jpg"  alt="Controller">
+            </div>
+        </div>
+        <div id="output"></div>
+    </div>
+    <p class="note">*Our agents will list for 2% and sellers may choose to offer between 0% to 3% to the Buyer’s Agent. Sellers are not required to offer a Buyer’s Agent Commission. If you do offer a Buyer Agent Commission and a buyer calls on your house directly without an agent, our agents have agreed to do the entire transaction for only 2% total. Homes under $150,000 will have a minimum sell-side commission of $3,000 and may offer between 0% to 3% to the Buyer’s Agent.</p>
+    </div>
+    <script>
+        var slider = document.getElementById("priceSlider");
+        var controller = document.querySelector(".custom-thumb");
+        var currentValue = document.getElementById("salePriceValue");
+        var output = document.getElementById("output");
+
+        // Helper function to format numbers with commas
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Function to calculate savings
+        function calculateSavings(price) {
+            let savingsWithoutAgent = 40 * (price / 1000);
+            let savingsWithAgent = 15 * (price / 1000);
+
+            return {
+                withoutAgent: savingsWithoutAgent,
+                withAgent: savingsWithAgent
+            };
+        }
+
+        // Update the slider value and output
+        function updateSliderOutput() {
+            const price = parseInt(slider.value);
+            currentValue.textContent = numberWithCommas(price);
+
+            // Calculate savings
+            const savings = calculateSavings(price);
+            output.innerHTML = `
+      <div style= "display:flex; gap:20px; ">
+        <div style="background-color:red;flex-grow:1;border-radius:5px; color:white; padding: 7px 10px ; text-align:center; font-size:12px"><span style="font-size:25px; display:block; margin-bottom:7px"">Save $${Math.round(savings.withoutAgent)}</span> when a buyer <span style= "display:block; font-weight:bold">doesn't have an agent.</span></div>
+        <div style="background-color:black; border-radius:5px; flex-grow:1;  color:white; padding: 7px 10px ; text-align:center; font-size:12px"><span style="font-size:25px; display:block; margin-bottom:7px">Save $${Math.round(savings.withAgent)}</span> when a buyer <span style= "display:block; font-weight:bold" > has an agent.</span></div>
+        </div>
+    `;
+
+            // Update slider background color dynamically based on the position of the controller
+            var percentage = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+            slider.style.background = `linear-gradient(to right, #FF0000 0%, #FF0000 ${percentage}%, #000000 ${percentage}%, #000000 100%)`;
+        }
+
+        // Initial positioning
+        updateSliderOutput();
+        updateControllerPosition(); // Call to ensure controller position is updated initially
+
+        slider.addEventListener("input", function() {
+            updateSliderOutput();
+            updateControllerPosition();
+        });
+
+        // Make controller draggable
+        controller.addEventListener("mousedown", function(event) {
+            event.preventDefault();
+            window.addEventListener("mousemove", moveController);
+            window.addEventListener("mouseup", stopController);
+        });
+
+        function moveController(event) {
+            // Calculate the new position of the controller
+            var newPosition = event.clientX - slider.getBoundingClientRect().left;
+            var percentage = newPosition / slider.offsetWidth;
+            var newValue = percentage * (slider.max - slider.min) + parseInt(slider.min);
+
+            // Clamp the new value to the range of the slider
+            newValue = Math.min(Math.max(newValue, slider.min), slider.max);
+
+            // Update the slider value by $5000 increments
+            newValue = Math.round(newValue / 5000) * 5000;
+
+            // Update the slider value and controller position
+            slider.value = newValue;
+            updateSliderOutput();
+            updateControllerPosition();
+        }
+
+        function stopController() {
+            window.removeEventListener("mousemove", moveController);
+            window.removeEventListener("mouseup", stopController);
+        }
+
+        function updateControllerPosition() {
+            // Calculate the new position of the controller and the percentage for the slider
+            var percentage = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+            controller.style.left = percentage + "%";
+        }
+    </script>
+</body>
+
+</html>
